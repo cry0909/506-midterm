@@ -1,9 +1,52 @@
-# 506-midterm
+CS506 midterm 
+Oct. 28th 2024
+Ruiyang Cao
+Introduction:
+The goal of this project was to predict review scores using Amazon movie review data. The approach involved a combination of feature engineering, data preprocessing, and model selection. This document describes the final algorithm implemented, the methods used to enhance model performance, and the thought processes behind feature and model choices. The focus was on optimizing the predictive accuracy within computational constraints and leveraging observed patterns to improve predictions.
+Data Loading and Initial Exploration
+The process started with loading training and testing datasets, containing user reviews and their associated helpfulness metrics. Preliminary exploration of the training data revealed an imbalance in the distribution of review scores, with certain ratings occurring more frequently. This prompted us to consider techniques that would balance the impact of different features to avoid bias toward common ratings.
+Feature Engineering
+Helpfulness Ratio
+A new feature, Helpfulness, was created to quantify user engagement with reviews by dividing HelpfulnessNumerator by HelpfulnessDenominator:
+Helpfulness = HelpfulnessNumerator / HelpfulnessDenominator
+Assumption: Reviews deemed helpful by other users might correlate with specific ratings, as they may indicate more detailed or useful feedback.
+Textual Features
+Top keywords were extracted from high-helpfulness reviews using CountVectorizer, which provided binary features indicating the presence of each keyword in the review. We also manually added specific keywords like "love," "recommend," and "great" based on their association with positive ratings.
+Assumption: Certain keywords or phrases are likely indicators of sentiment intensity, influencing review scores.
+Review Length
+Here introduced two features to capture the characteristics of the review text:
+word_count: Total word count in the review.
+avg_word_length: Average word length in the review text.
+Assumption: Longer or more detailed reviews might indicate a stronger opinion, potentially correlating with certain ratings.
+Data Preprocessing
+To handle missing values and ensure data consistency:
+Missing Values: Helpfulness values where the denominator was zero were filled with zero.
+Data Consistency: Ensured alignment of all features between the training and testing sets.
+Model Creation
+Base Models
+We used two base models for this project:
+RandomForestClassifier: Chosen for its ability to handle non-linear relationships and high-dimensional data.
+Advantages: High interpretability, resilience to overfitting due to ensemble averaging.
+LogisticRegression: A linear model included to reduce overfitting and capture linear trends in the data.
+Parameters: Increased max_iter to ensure convergence.
+Meta-Model (Stacking with XGBoost)
+An XGBoostClassifier was used as the meta-model, with stacking features derived from the mean and max probabilities of each base model. A grid search optimized the hyperparameters (n_estimators, learning_rate, max_depth, and reg_lambda) to find the best-performing combination.
+Model Evaluation
+Accuracy Score
+The model’s accuracy was evaluated on the validation set, measuring the proportion of correct predictions over the total predictions made.
+Confusion Matrix
+To analyze the performance across different classes, we used a confusion matrix:
+True Positives (TP): Correctly predicted scores.
+False Positives (FP) and False Negatives (FN): Incorrectly predicted scores that were either over- or under-estimated.
+Patterns Noticed and Utilized
+Helpfulness Ratio Impact: Reviews with high helpfulness often corresponded to more extreme ratings, and including this feature improved accuracy for these cases.
+Keyword Importance: Common keywords helped the model capture sentiment, enhancing accuracy for reviews with strong positive or negative opinions.
+Temporal Patterns: By including Time as a feature, we accounted for any evolving trends in review patterns over time.
+Assumptions Made
+Helpfulness Ratio Validity: Assumed that reviews with HelpfulnessDenominator of zero had meaningful ratios; filled NaNs with zero to address division errors.
+Keyword Relevance: Assumed that certain keywords were direct indicators of sentiment, justifying their binary encoding.
+Feature Independence: Assumed that selected features contribute independently to predictions, supporting their inclusion without multicollinearity checks.
+Conclusion
+The final model effectively predicts Amazon review scores by leveraging feature engineering, base and meta-model stacking, and systematic hyperparameter tuning. Key enhancements included custom feature extraction, keyword-based sentiment capture, and thorough validation of model performance. Future work could explore additional text-based features, such as TF-IDF vectorization, to further capture nuanced sentiment in reviews.
 
-Our project aimed to build an efficient and accurate model for predicting review scores based on text data and associated helpfulness metrics. Due to computational constraints, we limited our training to a 20% sample of the data, assuming this subset would be representative enough to capture key patterns. The final model leverages a stacking ensemble approach, combining feature engineering and two base models—RandomForest and Logistic Regression—with an XGBoost meta-model to improve classification accuracy. This approach provided the flexibility to capture diverse relationships in the data without overfitting.
 
-In the preprocessing phase, we focused on extracting meaningful features from the text and numeric data provided in the dataset. To enhance the model’s ability to capture relevant patterns, we engineered several custom features, including a Helpfulness ratio (derived from HelpfulnessNumerator and HelpfulnessDenominator), word count, and average word length. Additionally, we applied CountVectorizer to identify the top 10 keywords from reviews with high helpfulness scores and supplemented them with manually selected keywords such as "love," "great," and "recommend." These keywords, encoded as binary features, provided insights into sentiment and common patterns among different review scores.
-
-For model training, we adopted a two-level stacking ensemble. At the base level, we trained a RandomForestClassifier with 75 trees and a LogisticRegression model, each trained on cross-validation splits to capture variability. Their probability outputs were then used as inputs for the meta-model. The final meta-model, an XGBoostClassifier, was tuned using grid search to find optimal parameters, including n_estimators, learning_rate, max_depth, and reg_lambda. By calculating the mean and maximum probabilities from the base models as features, the meta-model was able to capture underlying trends from both linear and non-linear relationships, enhancing accuracy without excessive complexity.
-
-In conclusion, this layered approach allowed us to effectively utilize a reduced dataset while maximizing predictive performance. Keyword-based features, combined with word count and helpfulness ratios, proved invaluable in distinguishing review scores. Additionally, tuning the stacking meta-model enabled it to generalize well on the unseen test data, yielding a competitive accuracy. This ensemble model, with its focus on meaningful feature engineering and balanced model complexity, provided an effective solution for the problem within the computational limits imposed.
