@@ -1,4 +1,7 @@
 CS506 midterm 
+This can also be found in pdf file, I just copy and past here.
+
+
 Oct. 28th 2024
 Ruiyang Cao
 Introduction:
